@@ -17,6 +17,8 @@ public class myClient {
         PrintStream p = new PrintStream(socket.getOutputStream());
         p.println(number);
         temp = scanner1.nextInt();
+        
         System.out.println(temp);
+
     }
 }
