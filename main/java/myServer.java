@@ -1,22 +1,48 @@
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Scanner;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class myServer {
     public static void main(String args[]) throws IOException {
-        int number, temp;
-        ServerSocket s1 = new ServerSocket(1234);
-        Socket ss = s1.accept();
-        Scanner sc = new Scanner(ss.getInputStream());
-        number = sc.nextInt();
+        ServerSocket serverSocket = null;
+        try{
+            serverSocket = new ServerSocket(1234);
+            System.out.println(getTime() + "server ready");
+        }catch(IOException e){
+            e.printStackTrace();
+        }
 
-        temp = number*5;
+        while(true){
+            try{
+                System.out.println(getTime() + "wait request from client");
 
-        PrintStream ps = new PrintStream(ss.getOutputStream());
-        ps.println(temp);
+                // create new socket
+                Socket socket = serverSocket.accept();
+                System.out.println(getTime() + "request from " + socket.getInetAddress());
 
+                // get output stream of socket
+                OutputStream outputStream = socket.getOutputStream();
+                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
+
+                // send data to remote socket
+                dataOutputStream.writeUTF("test message from server");
+                System.out.println(getTime() + "data send complete");
+
+                // close stream and socket
+                dataOutputStream.close();
+                socket.close();
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    static String getTime(){
+        SimpleDateFormat sdf = new SimpleDateFormat("[hh:mm:ss]");
+        return sdf.format(new Date());
     }
 }

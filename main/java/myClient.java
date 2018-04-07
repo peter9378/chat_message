@@ -1,24 +1,35 @@
+import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.PrintStream;
+import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Scanner;
 
 
 public class myClient {
     public static void main(String args[]) throws IOException {
-        int number, temp;
-        Scanner sc = new Scanner(System.in);
-        Socket socket = new Socket("127.0.0.1", 1234);
-        Scanner scanner1 = new Scanner(socket.getInputStream());
-        System.out.println("Enter any number");
-        number = sc.nextInt();
+        try {
+            String testIp = "127.0.0.1"; // test local ip
 
-        PrintStream p = new PrintStream(socket.getOutputStream());
-        p.println(number);
-        temp = scanner1.nextInt();
-        
-        System.out.println(temp);
+            // create new socket and send request to server
+            Socket socket = new Socket(testIp, 1234);
 
+            // get input stream of socket
+            InputStream inputStream = socket.getInputStream();
+            DataInputStream dataInputStream = new DataInputStream(inputStream);
+
+            // print data from socket
+            System.out.println("message from server : " + dataInputStream.readUTF());
+
+            // close stream and socket
+            dataInputStream.close();
+            socket.close();
+            System.out.println("connection has closed");
+        }catch(ConnectException ce) {
+            ce.printStackTrace();
+        }catch(IOException ie){
+            ie.printStackTrace();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 }
