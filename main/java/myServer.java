@@ -1,48 +1,92 @@
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 
 public class myServer {
-    public static void main(String args[]) throws IOException {
+    HashMap clients;
+    myServer(){
+        clients = new HashMap();
+        Collections.synchronizedMap(clients);
+    }
+
+    public void start(){
         ServerSocket serverSocket = null;
+        Socket socket = null;
         try{
-            serverSocket = new ServerSocket(1234);
-            System.out.println(getTime() + "server ready");
-        }catch(IOException e){
+            serverSocket = new ServerSocket(7777);
+            System.out.println("server is running now");
+            while(true){
+                socket = serverSocket.accept();
+                System.out.println("[" + socket.getInetAddress() + ":"
+                        + socket.getPort() + "]" + "has new connetcion");
+                ServerReceiver thread = new ServerReceiver(socket);
+                thread.start();
+            }
+        }catch(Exception e){
             e.printStackTrace();
         }
+    }
 
-        while(true){
+    void sendToAll(String msg){
+        Iterator iter = clients.keySet().iterator();
+        while(iter.hasNext()){
             try{
-                System.out.println(getTime() + "wait request from client");
-
-                // create new socket
-                Socket socket = serverSocket.accept();
-                System.out.println(getTime() + "request from " + socket.getInetAddress());
-
-                // get output stream of socket
-                OutputStream outputStream = socket.getOutputStream();
-                DataOutputStream dataOutputStream = new DataOutputStream(outputStream);
-
-                // send data to remote socket
-                dataOutputStream.writeUTF("test message from server");
-                System.out.println(getTime() + "data send complete");
-
-                // close stream and socket
-                dataOutputStream.close();
-                socket.close();
-            }catch(IOException e){
+                DataOutputStream dataOutputStream = (DataOutputStream) clients.get(iter.next());
+                dataOutputStream.writeUTF(msg);
+            }catch(Exception e){
                 e.printStackTrace();
             }
         }
     }
 
+    public static void main(String args[]) {
+        new myServer().start();
+    }
+
+    class ServerReceiver extends Thread{
+        Socket socket;
+        DataInputStream dataInputStream;
+        DataOutputStream dataOutputStream;
+        ServerReceiver(Socket socket){
+            this.socket = socket;
+            try{
+                dataInputStream = new DataInputStream(socket.getInputStream());
+                dataOutputStream = new DataOutputStream(socket.getOutputStream());
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        public void run(){
+            String name = "";
+            try{
+                name = dataInputStream.readUTF();
+                sendToAll("[NOTICE] " + name + " has connected");
+                clients.put(name, dataOutputStream);
+                System.out.println("[NOTICE] current client : " + clients.size());
+                while(dataInputStream != null){
+                    sendToAll(dataInputStream.readUTF());
+                }
+            }catch(IOException e){
+                e.printStackTrace();
+            }finally{
+                sendToAll("[NOTICE] " + name + " has disconnected");
+                clients.remove(name);
+                System.out.println("[" + socket.getInetAddress()
+                        + ":" + socket.getPort() + "] has disconnected");
+                System.out.println("current client : " + clients.size());
+            }
+        }
+    }
+
+
     static String getTime(){
-        SimpleDateFormat sdf = new SimpleDateFormat("[hh:mm:ss]");
+        SimpleDateFormat sdf = new SimpleDateFormat("[hh:mm:ss] ");
         return sdf.format(new Date());
     }
 }
