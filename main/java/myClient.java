@@ -11,20 +11,76 @@ public class myClient {
     public static void main(String args[]){
         try{
             String serverIp = "127.0.0.1";
-
+            String name = "";
+            String id = "";
+            String password = "";
             // create socket and request connection
             Socket socket = new Socket(serverIp, 7777);
 
             // TODO: implement user profile with database
+            // TODO: implement sign in/up
             // use user input temporarily
-            System.out.println("what is your name?");
-            Scanner scanner = new Scanner(System.in);
+            System.out.println("welcome to chat program!");
 
-            Thread sender = new Thread(new ClientSender(socket, scanner.nextLine()));
-            System.out.println("connected to server");
-            Thread receiver = new Thread(new ClientReceiver(socket));
-            sender.start();
-            receiver.start();
+            while(true) {
+                System.out.println("please enter your command");
+                System.out.println("1. sign in");
+                System.out.println("2. sign up");
+                System.out.println("0. exit");
+
+                Scanner scanner = new Scanner(System.in);
+                while (!scanner.hasNextInt()) {
+                    scanner.next();
+                    System.out.println("command error! please enter 0~2");
+                }
+
+                int menu = scanner.nextInt();
+
+                if (menu == 1) {
+                    // TODO: sign in
+                    while(true) {
+                        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                        dataOutputStream.writeUTF("in");
+                        System.out.println("please enter your id");
+                        id = scanner.nextLine();
+                        System.out.println("please enter your password");
+                        password = scanner.nextLine();
+
+                        // TODO: authentication by server
+                        dataOutputStream.writeUTF(id);
+                        dataOutputStream.writeUTF(password);
+
+                        /*
+                        if(authentication success){
+                            break;
+                        }
+                         */
+                    }
+                } else if (menu == 2) {
+                    // TODO: sign up
+                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                    dataOutputStream.writeUTF("up");
+                    System.out.println("what is your name?");
+                    scanner = new Scanner(System.in);
+                    name = scanner.nextLine();
+                    System.out.println("please enter your id");
+                    id = scanner.nextLine();
+                    System.out.println("please enter your password");
+                    password = scanner.nextLine();
+
+                    // TODO: send to server and add to database
+                } else if (menu == 0) {
+                    // exit program
+                    return;
+                }
+
+                // TODO: get name by id in database
+                Thread sender = new Thread(new ClientSender(socket, name));
+                System.out.println("connected to server");
+                Thread receiver = new Thread(new ClientReceiver(socket));
+                sender.start();
+                receiver.start();
+            }
         }catch(ConnectException ce){
             ce.printStackTrace();
         }catch(Exception e){
@@ -45,13 +101,17 @@ public class myClient {
                 e.printStackTrace();
             }
         }
+
         public void run(){
             Scanner scanner = new Scanner(System.in);
+            System.out.println("1");
             try{
                 if(dataOutputStream != null){
+                    System.out.println("2");
                     dataOutputStream.writeUTF(name);
                 }
                 while(dataOutputStream != null){
+                    System.out.println("3");
                     dataOutputStream.writeUTF("[" + name + "]" + scanner.nextLine());
                 }
             }catch(IOException e){

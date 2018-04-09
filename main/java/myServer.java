@@ -23,7 +23,7 @@ public class myServer {
             while(true){
                 socket = serverSocket.accept();
                 System.out.println("[" + socket.getInetAddress() + ":"
-                        + socket.getPort() + "]" + "has new connetcion");
+                        + socket.getPort() + "]" + "has new connection");
                 ServerReceiver thread = new ServerReceiver(socket);
                 thread.start();
             }
@@ -41,6 +41,15 @@ public class myServer {
             }catch(Exception e){
                 e.printStackTrace();
             }
+        }
+    }
+
+    void sendToTarget(String target, String msg){
+        try{
+            DataOutputStream dataOutputStream = (DataOutputStream) clients.get(target);
+            dataOutputStream.writeUTF(msg);
+        }catch(Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -64,12 +73,33 @@ public class myServer {
 
         public void run(){
             String name = "";
+            String id = "";
+            String password = "";
+            String temp = "";
+            try{
+                if(dataInputStream.readUTF().equals("in")){
+                    // sign in process
+                }else if(dataInputStream.readUTF().equals("up")){
+                    // sign up process
+                }
+
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+
             try{
                 name = dataInputStream.readUTF();
+                id = dataInputStream.readUTF();
+                password = dataInputStream.readUTF();
+
+                // TODO : check id and password in database
+
                 sendToAll("[NOTICE] " + name + " has connected");
                 clients.put(name, dataOutputStream);
                 System.out.println("[NOTICE] current client : " + clients.size());
                 while(dataInputStream != null){
+//                    String target = dataInputStream.readUTF();
+//                    sendToTarget(target, dataInputStream.readUTF());
                     sendToAll(dataInputStream.readUTF());
                 }
             }catch(IOException e){
