@@ -105,14 +105,11 @@ public class myClient {
 
         public void run(){
             Scanner scanner = new Scanner(System.in);
-            System.out.println("1");
             try{
                 if(dataOutputStream != null){
-                    System.out.println("2");
                     dataOutputStream.writeUTF(name);
                 }
                 while(dataOutputStream != null){
-                    System.out.println("3");
                     dataOutputStream.writeUTF("[" + name + "]" + scanner.nextLine());
                 }
             }catch(IOException e){
