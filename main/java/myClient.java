@@ -3,6 +3,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.security.MessageDigest;
 import java.util.Scanner;
 
 
@@ -44,7 +45,7 @@ public class myClient {
                         System.out.println("please enter your id");
                         id = scanner.nextLine();
                         System.out.println("please enter your password");
-                        password = scanner.nextLine();
+                        password = getSHA256(scanner.nextLine());   // apply encryption
 
                         // TODO: authentication by server
                         dataOutputStream.writeUTF(id);
@@ -66,7 +67,7 @@ public class myClient {
                     System.out.println("please enter your id");
                     id = scanner.nextLine();
                     System.out.println("please enter your password");
-                    password = scanner.nextLine();
+                    password = getSHA256(scanner.nextLine());   // apply encryption
 
                     // TODO: send to server and add to database
                 } else if (menu == 0) {
@@ -142,6 +143,21 @@ public class myClient {
             }
         }
 
+    }
+
+    public static String getSHA256(String string)throws Exception{
+        StringBuffer sb = new StringBuffer();
+
+        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+        messageDigest.update(string.getBytes());
+
+        byte[] messageString = messageDigest.digest();
+        for(int i=0;i<messageString.length;i++){
+            byte tempByte = messageString[i];
+            String tmp = Integer.toString((tempByte&0xff)+0x100, 16).substring(1);
+            sb.append(tmp);
+        }
+        return sb.toString();
     }
 
 }
