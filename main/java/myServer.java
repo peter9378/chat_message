@@ -2,16 +2,29 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 
 public class myServer {
-    HashMap clients;
+    enum Status {online, offline, busy};
+
+    static class Client{
+        Status status;
+        String name;
+        String id;
+        String password;
+
+        Client(String name, String id, String password){
+            this.name = name;
+            this.id = id;
+            this.password = password;
+            this.status = Status.online;
+        }
+    }
+
+    List<Client> clients;
     myServer(){
-        clients = new HashMap();
-        Collections.synchronizedMap(clients);
+        clients = new ArrayList<Client>();
+        Collections.synchronizedList(clients);
     }
 
     public void start(){
@@ -33,34 +46,44 @@ public class myServer {
     }
 
     void sendToAll(String msg){
-        Iterator iter = clients.keySet().iterator();
-        while(iter.hasNext()){
+        for(Client client:clients){
             try{
-                DataOutputStream dataOutputStream = (DataOutputStream) clients.get(iter.next());
-                dataOutputStream.writeUTF(msg);
-            }catch(Exception e){
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+                DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+                if(!client.status.equals("offline") ) {
+                    dataOutputStream.writeUTF(msg);
+                }
+            }catch(IOException e){
                 e.printStackTrace();
             }
         }
     }
 
-    void sendToTarget(String target, String msg){
-        try{
-            DataOutputStream dataOutputStream = (DataOutputStream) clients.get(target);
-            dataOutputStream.writeUTF(msg);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
+    /*
+     * send message to specific target
+     * @param target target client user
+     * @param msg message that want to send
+     */
+//    void sendToTarget(String target, String msg){
+//        try{
+//            DataOutputStream dataOutputStream = (DataOutputStream) clients.get(target);
+//            dataOutputStream.writeUTF(msg);
+//        }catch(Exception e){
+//            e.printStackTrace();
+//        }
+//    }
 
     public static void main(String args[]) {
         new myServer().start();
     }
 
+
     class ServerReceiver extends Thread{
         Socket socket;
         DataInputStream dataInputStream;
         DataOutputStream dataOutputStream;
+
         ServerReceiver(Socket socket){
             this.socket = socket;
             try{
@@ -72,30 +95,41 @@ public class myServer {
         }
 
         public void run(){
+            Client client;
             String name = "";
             String id = "";
             String password = "";
             String temp = "";
             try{
-                if(dataInputStream.readUTF().equals("in")){
+                String command = dataInputStream.readUTF();
+                // TODO : check id and password in database
+                if(command.equals("in")){
                     // sign in process
-                }else if(dataInputStream.readUTF().equals("up")){
+                    id = dataInputStream.readUTF();
+                    password = dataInputStream.readUTF();
+
+                    // check id and password in database
+
+                }else if(command.equals("up")){
                     // sign up process
+                    name = dataInputStream.readUTF();
+                    id = dataInputStream.readUTF();
+                    password = dataInputStream.readUTF();
+
+                    // check if id is overlapped or not
+
+                    // if all process works well
+
                 }
 
             }catch(IOException e){
                 e.printStackTrace();
             }
+            client = new Client(name, id, password);
 
             try{
-                name = dataInputStream.readUTF();
-                id = dataInputStream.readUTF();
-                password = dataInputStream.readUTF();
-
-                // TODO : check id and password in database
-
                 sendToAll("[NOTICE] " + name + " has connected");
-                clients.put(name, dataOutputStream);
+                clients.add(client);
                 System.out.println("[NOTICE] current client : " + clients.size());
                 while(dataInputStream != null){
 //                    String target = dataInputStream.readUTF();
@@ -113,7 +147,6 @@ public class myServer {
             }
         }
     }
-
 
     static String getTime(){
         SimpleDateFormat sdf = new SimpleDateFormat("[hh:mm:ss] ");
