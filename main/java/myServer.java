@@ -7,6 +7,7 @@ import java.util.*;
 public class myServer {
     enum Status {online, offline, busy};
 
+    /*
     static class Client{
         Status status;
         String name;
@@ -20,11 +21,12 @@ public class myServer {
             this.status = Status.online;
         }
     }
+    */
 
-    List<Client> clients;
+    HashMap clients;
     myServer(){
-        clients = new ArrayList<Client>();
-        Collections.synchronizedList(clients);
+        clients = new HashMap<String, Status>();
+        Collections.synchronizedMap(clients);
     }
 
     public void start(){
@@ -46,18 +48,16 @@ public class myServer {
     }
 
     void sendToAll(String msg){
-        for(Client client:clients){
+        Iterator iter = clients.keySet().iterator();
+        while(iter.hasNext()){
             try{
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-                DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-                if(!client.status.equals("offline") ) {
-                    dataOutputStream.writeUTF(msg);
-                }
-            }catch(IOException e){
+                DataOutputStream dataOutputStream = (DataOutputStream)clients.get(iter.next());
+                dataOutputStream.writeUTF(msg);
+            }catch(Exception e){
                 e.printStackTrace();
             }
         }
+
     }
 
     /*
@@ -95,7 +95,7 @@ public class myServer {
         }
 
         public void run(){
-            Client client;
+            // Client client;
             String name = "";
             String id = "";
             String password = "";
@@ -125,11 +125,10 @@ public class myServer {
             }catch(IOException e){
                 e.printStackTrace();
             }
-            client = new Client(name, id, password);
 
             try{
                 sendToAll("[NOTICE] " + name + " has connected");
-                clients.add(client);
+                clients.put(name, dataOutputStream);
                 System.out.println("[NOTICE] current client : " + clients.size());
                 while(dataInputStream != null){
 //                    String target = dataInputStream.readUTF();
