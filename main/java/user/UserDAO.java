@@ -7,7 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
-import java.util.List;
+
 
 public class UserDAO {
     Connection connection = null;
@@ -27,14 +27,14 @@ public class UserDAO {
 
     public void addUser(User user) {
         try {
-            String query = "INSERT into User(id, name, password, index) VALUES(?, ?, ?, ?)";
-
+            String query = "insert into User values(?, ?, ?, ?, ?);";
             connection = getConnection();
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, user.getId());
             preparedStatement.setString(2, user.getName());
             preparedStatement.setString(3, user.getPassword());
-            preparedStatement.setInt(4, user.getIndex());
+            preparedStatement.setString(4, user.getStatus().toString());
+            preparedStatement.setInt(5, user.getIndex());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
