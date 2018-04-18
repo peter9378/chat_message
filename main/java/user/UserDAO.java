@@ -1,3 +1,5 @@
+import myDB.DBUtil;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,7 +14,7 @@ public class UserDAO {
 
     }
 
-    private Connection getConnection() throws SQLException {
+    public Connection getConnection() throws SQLException {
         DBUtil dbUtil = new DBUtil();
         Connection con;
         con = dbUtil.getConnection();
@@ -34,18 +36,18 @@ public class UserDAO {
             e.printStackTrace();
         } finally {
             try {
-                if (preparedStatement != null)
+                if (preparedStatement != null) {
                     preparedStatement.close();
-                if (connection != null)
+                }
+                if (connection != null) {
                     connection.close();
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
-
     }
 
     public void deleteUser(String id) {
@@ -73,7 +75,7 @@ public class UserDAO {
 
     }
 
-    public void getUserList() {
+    public LinkedList<User> getUserList() {
         try {
             String queryString = "SELECT * FROM User";
             connection = getConnection();

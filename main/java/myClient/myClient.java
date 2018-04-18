@@ -23,7 +23,6 @@ public class myClient {
             // use user input temporarily
             System.out.println("welcome to chat program!");
 
-            while(true) {
                 System.out.println("please enter your command");
                 System.out.println("1. sign in");
                 System.out.println("2. sign up");
@@ -61,8 +60,8 @@ public class myClient {
                     // TODO: sign up
                     DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
                     dataOutputStream.writeUTF("up");
-                    System.out.println("what is your name?");
                     scanner = new Scanner(System.in);
+                    System.out.println("what is your name?");
                     name = scanner.nextLine();
                     System.out.println("please enter your id");
                     id = scanner.nextLine();
@@ -70,6 +69,10 @@ public class myClient {
                     password = getSHA256(scanner.nextLine());   // apply encryption
 
                     // TODO: send to server and add to database
+                    dataOutputStream.writeUTF(name);
+                    dataOutputStream.writeUTF(id);
+                    dataOutputStream.writeUTF(password);
+
                 } else if (menu == 0) {
                     // exit program
                     return;
@@ -81,7 +84,6 @@ public class myClient {
                 Thread receiver = new Thread(new ClientReceiver(socket));
                 sender.start();
                 receiver.start();
-            }
         }catch(ConnectException ce){
             ce.printStackTrace();
         }catch(Exception e){

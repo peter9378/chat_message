@@ -1,3 +1,8 @@
+package myServer;
+
+import user.User;
+import user.UserDAO;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -6,22 +11,6 @@ import java.util.*;
 
 public class myServer {
     enum Status {online, offline, busy};
-
-    /*
-    static class Client{
-        Status status;
-        String name;
-        String id;
-        String password;
-
-        Client(String name, String id, String password){
-            this.name = name;
-            this.id = id;
-            this.password = password;
-            this.status = Status.online;
-        }
-    }
-    */
 
     HashMap clients;
     myServer(){
@@ -60,24 +49,9 @@ public class myServer {
 
     }
 
-    /*
-     * send message to specific target
-     * @param target target client user
-     * @param msg message that want to send
-     */
-//    void sendToTarget(String target, String msg){
-//        try{
-//            DataOutputStream dataOutputStream = (DataOutputStream) clients.get(target);
-//            dataOutputStream.writeUTF(msg);
-//        }catch(Exception e){
-//            e.printStackTrace();
-//        }
-//    }
-
     public static void main(String args[]) {
         new myServer().start();
     }
-
 
     class ServerReceiver extends Thread{
         Socket socket;
@@ -100,30 +74,47 @@ public class myServer {
             String id = "";
             String password = "";
             String temp = "";
-            try{
-                String command = dataInputStream.readUTF();
-                // TODO : check id and password in database
-                if(command.equals("in")){
-                    // sign in process
-                    id = dataInputStream.readUTF();
-                    password = dataInputStream.readUTF();
+            while(true) {
+                UserDAO userDAO = new UserDAO();
+                try {
+                    String command = dataInputStream.readUTF();
+                    // TODO : check id and password in database
+                    if (command.equals("in")) {
+                        // sign in process
+                        id = dataInputStream.readUTF();
+                        password = dataInputStream.readUTF();
 
-                    // check id and password in database
+                        // check id and password in database
+                        if(userDAO.isCorrectUser(id, password)){
+                            // sign in success
+                            System.out.println("sign in success");
+                            break;
+                        }else{
+                            // TODO: classify sign in failure(password incorrect, id doesn't exist etc...)
+                            // wrong password, sign in failure
+                            System.out.println("password incorrect");
+                        }
+                    } else if (command.equals("up")) {
+                        // sign up process
+                        name = dataInputStream.readUTF();
+                        id = dataInputStream.readUTF();
+                        password = dataInputStream.readUTF();
 
-                }else if(command.equals("up")){
-                    // sign up process
-                    name = dataInputStream.readUTF();
-                    id = dataInputStream.readUTF();
-                    password = dataInputStream.readUTF();
+                        // check if id is overlapped or not
+                        if (userDAO.isIdExist(id)) {
+                            // new User's index is -1
+                            userDAO.addUser(new User(id, name, password, -1));
+                            System.out.println("sign up success");
+                            break;
+                        } else {
+                            // id overlap exception
+                            System.out.println("already exist id");
+                        }
+                    }
 
-                    // check if id is overlapped or not
-
-                    // if all process works well
-
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
-            }catch(IOException e){
-                e.printStackTrace();
             }
 
             try{
@@ -131,8 +122,6 @@ public class myServer {
                 clients.put(name, dataOutputStream);
                 System.out.println("[NOTICE] current client : " + clients.size());
                 while(dataInputStream != null){
-//                    String target = dataInputStream.readUTF();
-//                    sendToTarget(target, dataInputStream.readUTF());
                     sendToAll(dataInputStream.readUTF());
                 }
             }catch(IOException e){
