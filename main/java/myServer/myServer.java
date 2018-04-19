@@ -10,71 +10,72 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class myServer {
-    enum Status {online, offline, busy};
+    enum Status {online, offline, busy}
+
 
     HashMap clients;
-    myServer(){
-        clients = new HashMap<String, Status>();
+
+    myServer() {
+        clients = new HashMap();
         Collections.synchronizedMap(clients);
     }
 
-    public void start(){
+    public void start() {
         ServerSocket serverSocket = null;
         Socket socket = null;
-        try{
+        try {
             serverSocket = new ServerSocket(7777);
             System.out.println("server is running now");
-            while(true){
+            while (true) {
                 socket = serverSocket.accept();
                 System.out.println("[" + socket.getInetAddress() + ":"
                         + socket.getPort() + "]" + "has new connection");
                 ServerReceiver thread = new ServerReceiver(socket);
                 thread.start();
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    void sendToAll(String msg){
+    void sendToAll(String msg) {
         Iterator iter = clients.keySet().iterator();
-        while(iter.hasNext()){
-            try{
-                DataOutputStream dataOutputStream = (DataOutputStream)clients.get(iter.next());
+        while (iter.hasNext()) {
+            try {
+                DataOutputStream dataOutputStream = (DataOutputStream) clients.get(iter.next());
                 dataOutputStream.writeUTF(msg);
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-
     }
 
     public static void main(String args[]) {
         new myServer().start();
     }
 
-    class ServerReceiver extends Thread{
+    class ServerReceiver extends Thread {
         Socket socket;
         DataInputStream dataInputStream;
         DataOutputStream dataOutputStream;
 
-        ServerReceiver(Socket socket){
+        ServerReceiver(Socket socket) {
             this.socket = socket;
-            try{
+            try {
                 dataInputStream = new DataInputStream(socket.getInputStream());
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
-            }catch(IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        public void run(){
+        public void run() {
             // Client client;
             String name = "";
             String id = "";
             String password = "";
             String temp = "";
-            while(true) {
+            while (true) {
                 UserDAO userDAO = new UserDAO();
                 try {
                     String command = dataInputStream.readUTF();
@@ -85,14 +86,34 @@ public class myServer {
                         password = dataInputStream.readUTF();
 
                         // check id and password in database
-                        if(userDAO.isCorrectUser(id, password)){
+                        if (userDAO.isCorrectUser(id, password)) {
                             // sign in success
                             System.out.println("sign in success");
+                            name = userDAO.getNameById(id);
+
+                            // add online client
+                            clients.put(name, dataOutputStream);
+
+                            // get set from clients
+                            Set<Map.Entry<String, DataOutputStream>> set = clients.entrySet();
+                            Iterator<Map.Entry<String, DataOutputStream>> iter = set.iterator();
+
+                            // find specific client by name and send success message
+                            dataOutputStream.writeUTF("success");
+//                            while(iter.hasNext()){
+//                                Map.Entry<String, DataOutputStream> entry = (Map.Entry<String, DataOutputStream>)iter.next();
+//                                if(entry.getKey().equals(name)) {
+//                                    entry.getValue().writeUTF("success");
+//                                    break;
+//                                }
+//                            }
                             break;
-                        }else{
+                        } else {
                             // TODO: classify sign in failure(password incorrect, id doesn't exist etc...)
                             // wrong password, sign in failure
                             System.out.println("password incorrect");
+                            dataOutputStream.writeUTF("failure");
+                            break;
                         }
                     } else if (command.equals("up")) {
                         // sign up process
@@ -105,6 +126,23 @@ public class myServer {
                             // new User's index is -1
                             userDAO.addUser(new User(id, name, password, -1));
                             System.out.println("sign up success");
+
+                            // add online client
+                            clients.put(name, dataOutputStream);
+
+                            // get set from clients
+                            Set<Map.Entry<String, DataOutputStream>> set = clients.entrySet();
+                            Iterator<Map.Entry<String, DataOutputStream>> iter = set.iterator();
+
+                            // find specific client by name and send success message
+                            dataOutputStream.writeUTF("success");
+//                            while(iter.hasNext()){
+//                                Map.Entry<String, DataOutputStream> entry = (Map.Entry<String, DataOutputStream>)iter.next();
+//                                if(entry.getKey().equals(name)) {
+//                                    entry.getValue().writeUTF("success");
+//                                    break;
+//                                }
+//                            }
                             break;
                         } else {
                             // id overlap exception
@@ -117,16 +155,16 @@ public class myServer {
                 }
             }
 
-            try{
+            try {
                 sendToAll("[NOTICE] " + name + " has connected");
                 clients.put(name, dataOutputStream);
                 System.out.println("[NOTICE] current client : " + clients.size());
-                while(dataInputStream != null){
+                while (dataInputStream != null) {
                     sendToAll(dataInputStream.readUTF());
                 }
-            }catch(IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
-            }finally{
+            } finally {
                 sendToAll("[NOTICE] " + name + " has disconnected");
                 clients.remove(name);
                 System.out.println("[" + socket.getInetAddress()
@@ -136,7 +174,7 @@ public class myServer {
         }
     }
 
-    static String getTime(){
+    static String getTime() {
         SimpleDateFormat sdf = new SimpleDateFormat("[hh:mm:ss] ");
         return sdf.format(new Date());
     }
