@@ -1,3 +1,5 @@
+package myClient;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -9,9 +11,9 @@ import java.util.Scanner;
 
 public class myClient {
 
-    public static void main(String args[]){
-        try{
-            String serverIp = "127.0.0.1";
+    public static void main(String args[]) {
+        try {
+            String serverIp = "127.0.0.1";  // local ip
             String name = "";
             String id = "";
             String password = "";
@@ -23,6 +25,7 @@ public class myClient {
             // use user input temporarily
             System.out.println("welcome to chat program!");
 
+            while (true) {
                 System.out.println("please enter your command");
                 System.out.println("1. sign in");
                 System.out.println("2. sign up");
@@ -38,23 +41,21 @@ public class myClient {
 
                 if (menu == 1) {
                     // TODO: sign in
-                    while(true) {
-                        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                        dataOutputStream.writeUTF("in");
-                        System.out.println("please enter your id");
-                        id = scanner.nextLine();
-                        System.out.println("please enter your password");
-                        password = getSHA256(scanner.nextLine());   // apply encryption
+                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                    dataOutputStream.writeUTF("in");
+                    scanner.nextLine();
+                    System.out.println("please enter your id");
+                    id = scanner.nextLine();
+                    System.out.println("please enter your password");
+                    password = getSHA256(scanner.nextLine());   // apply encryption
+                    // TODO: authentication by server
+                    dataOutputStream.writeUTF(id);
+                    dataOutputStream.writeUTF(password);
 
-                        // TODO: authentication by server
-                        dataOutputStream.writeUTF(id);
-                        dataOutputStream.writeUTF(password);
-
-                        /*
-                        if(authentication success){
-                            break;
-                        }
-                         */
+                    DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+                    String result = dataInputStream.readUTF();
+                    if(result.equals("success")){
+                        break;
                     }
                 } else if (menu == 2) {
                     // TODO: sign up
@@ -68,92 +69,99 @@ public class myClient {
                     System.out.println("please enter your password");
                     password = getSHA256(scanner.nextLine());   // apply encryption
 
-                    // TODO: send to server and add to database
                     dataOutputStream.writeUTF(name);
                     dataOutputStream.writeUTF(id);
                     dataOutputStream.writeUTF(password);
 
+                    DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+                    String result = dataInputStream.readUTF();
+
+                    if(result.equals("success")){
+                        break;
+                    }
                 } else if (menu == 0) {
                     // exit program
                     return;
                 }
+            }
 
-                // TODO: get name by id in database
-                Thread sender = new Thread(new ClientSender(socket, name));
-                System.out.println("connected to server");
-                Thread receiver = new Thread(new ClientReceiver(socket));
-                sender.start();
-                receiver.start();
-        }catch(ConnectException ce){
+            // TODO: get name by id in database
+            System.out.println("connected to server");
+            Thread sender = new Thread(new ClientSender(socket, name));
+            Thread receiver = new Thread(new ClientReceiver(socket));
+            receiver.start();
+            sender.start();
+        } catch (ConnectException ce) {
             ce.printStackTrace();
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    static class ClientSender extends Thread{
+    static class ClientSender extends Thread {
         Socket socket;
         DataOutputStream dataOutputStream;
         String name;
-        ClientSender(Socket socket, String name){
+
+        ClientSender(Socket socket, String name) {
             this.socket = socket;
-            try{
+            try {
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
                 this.name = name;
-            }catch(Exception e){
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        public void run(){
+        public void run() {
             Scanner scanner = new Scanner(System.in);
-            try{
-                if(dataOutputStream != null){
+            try {
+                if (dataOutputStream != null) {
                     dataOutputStream.writeUTF(name);
                 }
-                while(dataOutputStream != null){
+                while (dataOutputStream != null) {
                     dataOutputStream.writeUTF("[" + name + "]" + scanner.nextLine());
                 }
-            }catch(IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    static class ClientReceiver extends Thread{
+    static class ClientReceiver extends Thread {
         Socket socket;
         DataInputStream dataInputStream;
-        ClientReceiver(Socket socket){
+
+        ClientReceiver(Socket socket) {
             this.socket = socket;
-            try{
+            try {
                 dataInputStream = new DataInputStream(socket.getInputStream());
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        public void run(){
-            while(dataInputStream != null){
-                try{
+        public void run() {
+            while (dataInputStream != null) {
+                try {
                     System.out.println(dataInputStream.readUTF());
-                }catch (IOException e){
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
-
     }
 
-    public static String getSHA256(String string)throws Exception{
+    public static String getSHA256(String string) throws Exception {
         StringBuffer sb = new StringBuffer();
 
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(string.getBytes());
 
         byte[] messageString = messageDigest.digest();
-        for(int i=0;i<messageString.length;i++){
+        for (int i = 0; i < messageString.length; i++) {
             byte tempByte = messageString[i];
-            String tmp = Integer.toString((tempByte&0xff)+0x100, 16).substring(1);
+            String tmp = Integer.toString((tempByte & 0xff) + 0x100, 16).substring(1);
             sb.append(tmp);
         }
         return sb.toString();
