@@ -12,6 +12,7 @@ import java.util.Scanner;
 public class myClient {
 
     public static void main(String args[]) {
+        myClientFrame frame;
         try {
             String serverIp = "127.0.0.1";  // local ip
             String name = "";
@@ -55,6 +56,7 @@ public class myClient {
                     DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                     String result = dataInputStream.readUTF();
                     if(result.equals("success")){
+                        name = dataInputStream.readUTF();
                         break;
                     }
                 } else if (menu == 2) {
@@ -85,12 +87,8 @@ public class myClient {
                 }
             }
 
-            // TODO: get name by id in database
-            System.out.println("connected to server");
-            Thread sender = new Thread(new ClientSender(socket, name));
-            Thread receiver = new Thread(new ClientReceiver(socket));
-            receiver.start();
-            sender.start();
+            frame = new myClientFrame(socket, name);
+            new ClientReceiver(socket, frame).start();
         } catch (ConnectException ce) {
             ce.printStackTrace();
         } catch (Exception e) {
@@ -100,29 +98,25 @@ public class myClient {
 
     static class ClientSender extends Thread {
         Socket socket;
+        myClientFrame frame;
         DataOutputStream dataOutputStream;
         String name;
 
-        ClientSender(Socket socket, String name) {
-            this.socket = socket;
+        public ClientSender(myClientFrame frame, String name) {
+            this.frame = frame;
+            this.socket = this.frame.socket;
+            this.name = name;
             try {
                 dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                this.name = name;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
 
-        public void run() {
-            Scanner scanner = new Scanner(System.in);
+        public void sendMessage(){
             try {
-                if (dataOutputStream != null) {
-                    dataOutputStream.writeUTF(name);
-                }
-                while (dataOutputStream != null) {
-                    dataOutputStream.writeUTF("[" + name + "]" + scanner.nextLine());
-                }
-            } catch (IOException e) {
+                dataOutputStream.writeUTF("[" + name + "]" + frame.messageField.getText());
+            }catch(IOException e){
                 e.printStackTrace();
             }
         }
@@ -130,12 +124,14 @@ public class myClient {
 
     static class ClientReceiver extends Thread {
         Socket socket;
+        myClientFrame frame;
         DataInputStream dataInputStream;
 
-        ClientReceiver(Socket socket) {
+        public ClientReceiver(Socket socket, myClientFrame frame) {
             this.socket = socket;
+            this.frame = frame;
             try {
-                dataInputStream = new DataInputStream(socket.getInputStream());
+                this.dataInputStream = new DataInputStream(socket.getInputStream());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -144,7 +140,11 @@ public class myClient {
         public void run() {
             while (dataInputStream != null) {
                 try {
-                    System.out.println(dataInputStream.readUTF());
+                    String message =  dataInputStream.readUTF();
+                    if(message == null){
+                        break;
+                    }
+                    frame.messageArea.append(message+"\n");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
