@@ -1,3 +1,5 @@
+package message;
+
 import java.sql.Timestamp;
 
 public class Message {
@@ -7,6 +9,12 @@ public class Message {
 
     public Message(){
 
+    }
+
+    public Message(int index, String text, Timestamp timeStamp){
+        this.index = index;
+        this.text = text;
+        this.timestamp = timeStamp;
     }
 
     public String getText() {
