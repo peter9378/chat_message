@@ -10,8 +10,13 @@ import java.util.Scanner;
 
 
 public class myClient {
+    public myClient(myClientFrame clientFrame){
+        this.
+    }
 
-    public static void main(String args[]) {
+
+
+    public static void main() {
         try {
             String serverIp = "127.0.0.1";  // local ip
             String name = "";
@@ -55,6 +60,7 @@ public class myClient {
                     DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                     String result = dataInputStream.readUTF();
                     if(result.equals("success")){
+                        name = dataInputStream.readUTF();
                         break;
                     }
                 } else if (menu == 2) {
