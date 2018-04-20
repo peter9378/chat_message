@@ -1,11 +1,15 @@
 package myServer;
 
+import message.Message;
+import message.MessageDAO;
 import user.User;
 import user.UserDAO;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -14,9 +18,15 @@ public class myServer {
 
 
     HashMap clients;
+    MessageDAO messageDAO = new MessageDAO();
 
     myServer() {
         clients = new HashMap();
+        try {
+            messageDAO.getConnection();
+        }catch(SQLException e){
+            e.printStackTrace();
+        }
         Collections.synchronizedMap(clients);
     }
 
@@ -39,11 +49,19 @@ public class myServer {
     }
 
     void sendToAll(String msg) {
+        // TODO: send to only online user
+        // TODO: when send successfully, update user's index(index++)
+        // TODO: add message to database
+        // TODO: send message include timestamp
+        messageDAO.addMessage(new Message(messageDAO.getIndex()+1, msg, Timestamp.valueOf(getTime())));
+
+
         Iterator iter = clients.keySet().iterator();
         while (iter.hasNext()) {
             try {
+                System.out.println(iter);
                 DataOutputStream dataOutputStream = (DataOutputStream) clients.get(iter.next());
-                dataOutputStream.writeUTF(msg);
+                dataOutputStream.writeUTF("[" + getTime() + "]" +msg);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -74,7 +92,7 @@ public class myServer {
             String name = "";
             String id = "";
             String password = "";
-            String temp = "";
+
             while (true) {
                 UserDAO userDAO = new UserDAO();
                 try {
@@ -95,11 +113,12 @@ public class myServer {
                             clients.put(name, dataOutputStream);
 
                             // get set from clients
-                            Set<Map.Entry<String, DataOutputStream>> set = clients.entrySet();
-                            Iterator<Map.Entry<String, DataOutputStream>> iter = set.iterator();
+//                            Set<Map.Entry<String, DataOutputStream>> set = clients.entrySet();
+//                            Iterator<Map.Entry<String, DataOutputStream>> iter = set.iterator();
 
                             // find specific client by name and send success message
                             dataOutputStream.writeUTF("success");
+                            dataOutputStream.writeUTF(name);
 //                            while(iter.hasNext()){
 //                                Map.Entry<String, DataOutputStream> entry = (Map.Entry<String, DataOutputStream>)iter.next();
 //                                if(entry.getKey().equals(name)) {
@@ -131,8 +150,8 @@ public class myServer {
                             clients.put(name, dataOutputStream);
 
                             // get set from clients
-                            Set<Map.Entry<String, DataOutputStream>> set = clients.entrySet();
-                            Iterator<Map.Entry<String, DataOutputStream>> iter = set.iterator();
+//                            Set<Map.Entry<String, DataOutputStream>> set = clients.entrySet();
+//                            Iterator<Map.Entry<String, DataOutputStream>> iter = set.iterator();
 
                             // find specific client by name and send success message
                             dataOutputStream.writeUTF("success");
@@ -175,7 +194,7 @@ public class myServer {
     }
 
     static String getTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("[hh:mm:ss] ");
+        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
         return sdf.format(new Date());
     }
 }
