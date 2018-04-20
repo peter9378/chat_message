@@ -1,9 +1,12 @@
+package message;
+
 import myDB.DBUtil;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedList;
 
 public class MessageDAO {
     Connection connection = null;
@@ -49,6 +52,33 @@ public class MessageDAO {
     }
 
     // get unread message by index
-    public void getUnreadMessage(int index){
+    public LinkedList<Message> getUnreadMessage(int index){
+        LinkedList<Message> unreadMessageList = new LinkedList<Message>();
+        try {
+            String queryString = "SELECT * FROM Message where Message.index > " + Integer.toString(index) + ";";
+            connection = getConnection();
+            preparedStatement = connection.prepareStatement(queryString);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                unreadMessageList.add(new Message(resultSet.getInt("index"), resultSet.getString("text"), resultSet.getTimestamp("timestamp")));
+                // print line
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return unreadMessageList;
     }
 }
