@@ -137,7 +137,7 @@ public class UserDAO {
 
     public boolean isCorrectUser(String id, String password){
         try{
-            String queryString = "SELECT User.password FROM User WHERE id=?";
+            String queryString = "SELECT * FROM User WHERE id=?";
             connection = getConnection();
             preparedStatement = connection.prepareStatement(queryString);
             preparedStatement.setString(1, id);
@@ -161,5 +161,32 @@ public class UserDAO {
             }
         }
         return false;
+    }
+
+    public String getNameById(String id){
+        String name = "";
+        try{
+            String queryString = "SELECT * FROM User WHERE id=?";
+            connection = getConnection();
+            preparedStatement = connection.prepareStatement(queryString);
+            preparedStatement.setString(1, id);
+            resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            name = resultSet.getString("name");
+        }catch(SQLException e){
+            e.printStackTrace();
+        }finally{
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return name;
     }
 }
