@@ -3,20 +3,43 @@ package myClient;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.ConnectException;
 import java.net.Socket;
-import java.security.MessageDigest;
 import java.util.Scanner;
 
 
 public class myClient {
-    public myClient(myClientFrame clientFrame){
-        this.
+    private Socket socket;
+    private myClientFrame clientFrame;
+
+    public final void runGUI(myClientFrame clientFrame){
+        this.clientFrame = clientFrame;
+    }
+
+    public void connect(){
+        String ipAddress = "127.0.0.1";
+        String id = "";
+        String name = "";
+        String password = "";
+
+        try{
+            Socket socket = new Socket(ipAddress, 7777);
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        clientFrame = new myClientFrame(socket);
+    }
+
+
+    public myClient(){
     }
 
 
 
     public static void main() {
+        myClient client = new myClient();
+        client.connect();
+
+        /*
         try {
             String serverIp = "127.0.0.1";  // local ip
             String name = "";
@@ -97,11 +120,14 @@ public class myClient {
             Thread receiver = new Thread(new ClientReceiver(socket));
             receiver.start();
             sender.start();
+
         } catch (ConnectException ce) {
             ce.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+            */
     }
 
     static class ClientSender extends Thread {
@@ -126,6 +152,7 @@ public class myClient {
                     dataOutputStream.writeUTF(name);
                 }
                 while (dataOutputStream != null) {
+                    // TODO: make this works with GUI
                     dataOutputStream.writeUTF("[" + name + "]" + scanner.nextLine());
                 }
             } catch (IOException e) {
@@ -150,27 +177,13 @@ public class myClient {
         public void run() {
             while (dataInputStream != null) {
                 try {
+                    // TODO: make this works at GUI
                     System.out.println(dataInputStream.readUTF());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         }
-    }
-
-    public static String getSHA256(String string) throws Exception {
-        StringBuffer sb = new StringBuffer();
-
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        messageDigest.update(string.getBytes());
-
-        byte[] messageString = messageDigest.digest();
-        for (int i = 0; i < messageString.length; i++) {
-            byte tempByte = messageString[i];
-            String tmp = Integer.toString((tempByte & 0xff) + 0x100, 16).substring(1);
-            sb.append(tmp);
-        }
-        return sb.toString();
     }
 
 }
