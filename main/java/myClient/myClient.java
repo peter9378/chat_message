@@ -18,6 +18,7 @@ public class myClient {
             String name = "";
             String id = "";
             String password = "";
+            String status = "";
             // create socket and request connection
             Socket socket = new Socket(serverIp, 7777);
 
@@ -57,7 +58,10 @@ public class myClient {
                     String result = dataInputStream.readUTF();
                     if(result.equals("success")){
                         name = dataInputStream.readUTF();
+                        status = "online";
                         break;
+                    }else if(result.equals("failure")){
+                        System.out.println("sign in fail! please try again.");
                     }
                 } else if (menu == 2) {
                     // TODO: sign up
@@ -79,7 +83,10 @@ public class myClient {
                     String result = dataInputStream.readUTF();
 
                     if(result.equals("success")){
+                        status = "online";
                         break;
+                    }else if(result.equals("failure")){
+                        System.out.println("sign up fail! please try again.");
                     }
                 } else if (menu == 0) {
                     // exit program
@@ -88,7 +95,12 @@ public class myClient {
             }
 
             frame = new myClientFrame(socket, name);
+            frame.nameLabel.setText("Hello, " + name + "    status : ");
+            frame.statusLabel.setText(status);
             new ClientReceiver(socket, frame).start();
+            ClientSender sender = new ClientSender(frame, name);
+            sender.start();
+
         } catch (ConnectException ce) {
             ce.printStackTrace();
         } catch (Exception e) {
@@ -145,6 +157,8 @@ public class myClient {
                         break;
                     }
                     frame.messageArea.append(message+"\n");
+                    // scroll to bottom
+                    frame.messageArea.setCaretPosition(frame.messageArea.getDocument().getLength());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -166,5 +180,4 @@ public class myClient {
         }
         return sb.toString();
     }
-
 }

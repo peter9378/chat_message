@@ -10,14 +10,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class myServer {
-    enum Status {online, offline, busy}
-
-
     HashMap clients;
+    UserDAO userDAO = new UserDAO();
     MessageDAO messageDAO = new MessageDAO();
 
     myServer() {
@@ -53,17 +50,23 @@ public class myServer {
         // TODO: when send successfully, update user's index(index++)
         // TODO: add message to database
         // TODO: send message include timestamp
-        messageDAO.addMessage(new Message(messageDAO.getIndex()+1, msg, Timestamp.valueOf(getTime())));
-
-
+        if(!msg.contains("[NOTICE]")) {
+            messageDAO.addMessage(new Message(messageDAO.getIndex(), msg, getTimestamp()));
+        }
         Iterator iter = clients.keySet().iterator();
         while (iter.hasNext()) {
-            try {
-                System.out.println(iter);
-                DataOutputStream dataOutputStream = (DataOutputStream) clients.get(iter.next());
-                dataOutputStream.writeUTF("[" + getTime() + "]" +msg);
-            } catch (Exception e) {
-                e.printStackTrace();
+            String name = (String)iter.next();
+            if(userDAO.isOnlineUserByName(name)) {
+                try {
+                    DataOutputStream dataOutputStream = (DataOutputStream) clients.get(name);
+                    dataOutputStream.writeUTF(getHMS(getTimestamp().toString()) + msg);
+                    if(!msg.contains("[NOTICE]")) {
+                        userDAO.setUserIndexByName(messageDAO.getIndex(), name);
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -111,21 +114,13 @@ public class myServer {
 
                             // add online client
                             clients.put(name, dataOutputStream);
+                            userDAO.updateUserStatus(id, "online");
 
-                            // get set from clients
-//                            Set<Map.Entry<String, DataOutputStream>> set = clients.entrySet();
-//                            Iterator<Map.Entry<String, DataOutputStream>> iter = set.iterator();
-
-                            // find specific client by name and send success message
                             dataOutputStream.writeUTF("success");
                             dataOutputStream.writeUTF(name);
-//                            while(iter.hasNext()){
-//                                Map.Entry<String, DataOutputStream> entry = (Map.Entry<String, DataOutputStream>)iter.next();
-//                                if(entry.getKey().equals(name)) {
-//                                    entry.getValue().writeUTF("success");
-//                                    break;
-//                                }
-//                            }
+
+                            sendUnreadMessage(id);
+
                             break;
                         } else {
                             // TODO: classify sign in failure(password incorrect, id doesn't exist etc...)
@@ -148,20 +143,9 @@ public class myServer {
 
                             // add online client
                             clients.put(name, dataOutputStream);
+                            userDAO.updateUserStatus(id, "online");
 
-                            // get set from clients
-//                            Set<Map.Entry<String, DataOutputStream>> set = clients.entrySet();
-//                            Iterator<Map.Entry<String, DataOutputStream>> iter = set.iterator();
-
-                            // find specific client by name and send success message
                             dataOutputStream.writeUTF("success");
-//                            while(iter.hasNext()){
-//                                Map.Entry<String, DataOutputStream> entry = (Map.Entry<String, DataOutputStream>)iter.next();
-//                                if(entry.getKey().equals(name)) {
-//                                    entry.getValue().writeUTF("success");
-//                                    break;
-//                                }
-//                            }
                             break;
                         } else {
                             // id overlap exception
@@ -175,26 +159,53 @@ public class myServer {
             }
 
             try {
-                sendToAll("[NOTICE] " + name + " has connected");
-                clients.put(name, dataOutputStream);
+                sendToAll("[NOTICE] " + name + " has joined");
+
                 System.out.println("[NOTICE] current client : " + clients.size());
                 while (dataInputStream != null) {
-                    sendToAll(dataInputStream.readUTF());
+                    String text = dataInputStream.readUTF();
+                    if(text.contains("/online")){
+                        userDAO.updateUserStatus(id, "online");
+                        sendUnreadMessage(id);
+                    }else if(text.contains("/offline")){
+                        userDAO.updateUserStatus(id, "offline");
+                    }else if(text.contains("/busy")){
+                        userDAO.updateUserStatus(id, "busy");
+                    }else {
+                        sendToAll(text);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
                 sendToAll("[NOTICE] " + name + " has disconnected");
                 clients.remove(name);
+                userDAO.updateUserStatus(id, "offline");
                 System.out.println("[" + socket.getInetAddress()
                         + ":" + socket.getPort() + "] has disconnected");
                 System.out.println("current client : " + clients.size());
             }
         }
+
+        public void sendUnreadMessage(String id){
+            LinkedList<Message> list = new LinkedList<Message>();
+            list = messageDAO.getUnreadMessage(userDAO.getIndexById(id));
+            for(Message message:list){
+                try {
+                    dataOutputStream.writeUTF(getHMS(getTimestamp().toString()) + message.getText());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
-    static String getTime() {
-        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm:ss");
-        return sdf.format(new Date());
+    public String getHMS(String timestamp){
+        return "[" + timestamp.substring(11, 19) + "]";
+    }
+
+    static Timestamp getTimestamp() {
+        Timestamp time = new Timestamp(System.currentTimeMillis());
+        return time;
     }
 }

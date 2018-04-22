@@ -12,17 +12,23 @@ public class myClientFrame extends JFrame implements ActionListener {
     JTextField messageField = new JTextField(15);
     JButton sendBtn = new JButton("send");
     JButton exitBtn = new JButton("exit");
+    JScrollPane scroll = new JScrollPane(messageArea);
     JPanel panel = new JPanel();
     Socket socket;
     ClientSender sender;
+    JLabel nameLabel = new JLabel();
+    JLabel statusLabel = new JLabel();
+
 
     public myClientFrame(Socket socket, String name){
         super("Chat Room");
         this.socket = socket;
         sender = new ClientSender(this, name);
 
-
+        add("North", nameLabel);
+        add("North", statusLabel);
         add("Center", messageArea);
+        panel.add(scroll);
         panel.add(messageField);
         panel.add(sendBtn);
         panel.add(exitBtn);
@@ -40,9 +46,19 @@ public class myClientFrame extends JFrame implements ActionListener {
     public void actionPerformed(ActionEvent e){
         // send button click
         if(e.getSource() == sendBtn){
-            if(messageField.getText().equals("")){
+            String text = messageField.getText();
+
+            // hot key setting
+            if(text.equals("")){
                 return;
+            }else if(text.equals("/online")){
+                this.statusLabel.setText("online");
+            }else if(text.equals("/offline")){
+                this.statusLabel.setText("offline");
+            }else if(text.equals("/busy")){
+                this.statusLabel.setText("busy");
             }
+
             // send message to server
             sender.sendMessage();
             messageField.setText("");
