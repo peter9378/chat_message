@@ -25,6 +25,7 @@ public class myClientFrame extends JFrame implements ActionListener {
         sender = new ClientSender(this, name);
 
         add("North", statusLabel);
+        messageArea.setEnabled(false);
         statusLabel.setAlignmentX(JLabel.CENTER);
         add("Center", scroll);
         panel.add(messageField);
@@ -40,12 +41,12 @@ public class myClientFrame extends JFrame implements ActionListener {
         });
 
         sendBtn.addActionListener(this);
-
         exitBtn.addActionListener(this);
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setBounds(300, 300, 350, 300);
+        setBounds(300, 300, 400, 350);
         setVisible(true);
+        setResizable(false);
     }
 
     public void actionPerformed(ActionEvent e){
@@ -53,7 +54,7 @@ public class myClientFrame extends JFrame implements ActionListener {
         if(e.getSource() == sendBtn){
             String text = messageField.getText();
 
-            // hot key setting
+            // hot command setting
             if(text.equals("")){
                 return;
             }else if(text.equals("/online")){
