@@ -56,7 +56,7 @@ public class myServer {
         Iterator iter = clients.keySet().iterator();
         while (iter.hasNext()) {
             String name = (String)iter.next();
-            if(userDAO.isOnlineUserByName(name)) {
+            if(userDAO.getStatusByName(name).equals("online")) {
                 try {
                     DataOutputStream dataOutputStream = (DataOutputStream) clients.get(name);
                     dataOutputStream.writeUTF(getHMS(getTimestamp().toString()) + msg);
@@ -168,7 +168,7 @@ public class myServer {
                         userDAO.updateUserStatus(id, "online");
                         sendUnreadMessage(id);
                     }else if(text.contains("/offline")){
-                        userDAO.updateUserStatus(id, "offline");
+                        userDAO.updateUserStatus(id, "offline");;
                     }else if(text.contains("/busy")){
                         userDAO.updateUserStatus(id, "busy");
                     }else if(text.contains("/userlist")) {
@@ -178,7 +178,11 @@ public class myServer {
                             dataOutputStream.writeUTF(user.getName() + " - " + user.getStatus());
                         }
                     }else {
-                        sendToAll(text);
+                        if(userDAO.getStatusByName(name).equals("offline")){
+                            dataOutputStream.writeUTF("you can't send message because your status is offline now.");
+                        }else {
+                            sendToAll(text);
+                        }
                     }
                 }
             } catch (IOException e) {
