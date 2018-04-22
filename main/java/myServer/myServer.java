@@ -171,6 +171,12 @@ public class myServer {
                         userDAO.updateUserStatus(id, "offline");
                     }else if(text.contains("/busy")){
                         userDAO.updateUserStatus(id, "busy");
+                    }else if(text.contains("/userlist")) {
+                        LinkedList<User> users = userDAO.getUserList();
+                        dataOutputStream.writeUTF("===== Userlist =====");
+                        for(User user:users){
+                            dataOutputStream.writeUTF(user.getName() + " - " + user.getStatus());
+                        }
                     }else {
                         sendToAll(text);
                     }
