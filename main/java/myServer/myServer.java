@@ -192,11 +192,12 @@ public class myServer {
             list = messageDAO.getUnreadMessage(userDAO.getIndexById(id));
             for(Message message:list){
                 try {
-                    dataOutputStream.writeUTF(getHMS(getTimestamp().toString()) + message.getText());
+                    dataOutputStream.writeUTF(getHMS(message.getTimestamp().toString()) + message.getText());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
+            userDAO.setUserIndexById(messageDAO.getIndex(), id);
         }
     }
 
