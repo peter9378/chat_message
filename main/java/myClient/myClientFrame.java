@@ -1,6 +1,7 @@
 package myClient;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.Socket;
@@ -25,6 +26,7 @@ public class myClientFrame extends JFrame implements ActionListener {
         sender = new ClientSender(this, name);
 
         add("North", statusLabel);
+        messageArea.setDisabledTextColor(Color.BLACK);
         messageArea.setEnabled(false);
         statusLabel.setAlignmentX(JLabel.CENTER);
         add("Center", scroll);
