@@ -26,8 +26,7 @@ public class myClientFrame extends JFrame implements ActionListener {
 
         add("North", statusLabel);
         statusLabel.setAlignmentX(JLabel.CENTER);
-        add("Center", messageArea);
-        panel.add(scroll);
+        add("Center", scroll);
         panel.add(messageField);
         panel.add(sendBtn);
         panel.add(exitBtn);
