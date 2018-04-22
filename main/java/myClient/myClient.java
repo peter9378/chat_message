@@ -14,7 +14,7 @@ public class myClient {
     public static void main(String args[]) {
         myClientFrame frame;
         try {
-            String serverIp = "127.0.0.1";  // local ip
+            String serverIp = "121.137.97.164"; // public ip
             String name = "";
             String id = "";
             String password = "";
