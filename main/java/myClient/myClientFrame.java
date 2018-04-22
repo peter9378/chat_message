@@ -16,7 +16,6 @@ public class myClientFrame extends JFrame implements ActionListener {
     JPanel panel = new JPanel();
     Socket socket;
     ClientSender sender;
-    JLabel nameLabel = new JLabel();
     JLabel statusLabel = new JLabel();
 
 
@@ -25,14 +24,21 @@ public class myClientFrame extends JFrame implements ActionListener {
         this.socket = socket;
         sender = new ClientSender(this, name);
 
-        add("North", nameLabel);
         add("North", statusLabel);
+        statusLabel.setAlignmentX(JLabel.CENTER);
         add("Center", messageArea);
         panel.add(scroll);
         panel.add(messageField);
         panel.add(sendBtn);
         panel.add(exitBtn);
         add("South", panel);
+
+        messageField.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendBtn.doClick();
+            }
+        });
 
         sendBtn.addActionListener(this);
 
