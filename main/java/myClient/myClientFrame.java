@@ -71,6 +71,8 @@ public class myClientFrame extends JFrame implements ActionListener {
                 this.statusLabel.setText("offline");
             }else if(text.equals("/busy")){
                 this.statusLabel.setText("busy");
+            }else if(text.equals("/retrieve")){
+                this.messageArea.setText("");
             }else if(text.equals("/exit")){
                 this.exitBtn.doClick();
             }

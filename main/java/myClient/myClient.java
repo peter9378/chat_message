@@ -93,12 +93,16 @@ public class myClient {
                     }
                 } else if (menu == 0) {
                     // exit program
+                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                    dataOutputStream.writeUTF("/exit");
+                    socket.close();
                     System.exit(0);
                 }
             }
 
             // open new frame
             frame = new myClientFrame(socket, name);
+            frame.getLocationOnScreen();
             frame.statusLabel.setText(status);
 
             // run receiver and sender

@@ -160,10 +160,11 @@ public class myServer {
                         }
                     }else if(command.equals("/exit")){
                         this.socket.close();
+                        dataInputStream.close();
                         break;
                     }
 
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -188,6 +189,11 @@ public class myServer {
                         dataOutputStream.writeUTF("===== Userlist =====");
                         for(User user:users){
                             dataOutputStream.writeUTF(user.getName() + " - " + user.getStatus());
+                        }
+                    }else if(text.contains("/retrieve")) {
+                        LinkedList<Message> messages = messageDAO.getAllMessages();
+                        for(Message message:messages){
+                            dataOutputStream.writeUTF(getHMS(message.getTimestamp().toString()) + message.getText());
                         }
                     }else {
                         if(userDAO.getStatusByName(name).equals("offline")){

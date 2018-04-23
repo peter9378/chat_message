@@ -108,4 +108,34 @@ public class MessageDAO {
         }
         return -1;
     }
+
+    // get all messages
+    public LinkedList<Message> getAllMessages(){
+        LinkedList<Message> messageList = new LinkedList<Message>();
+        try {
+            String queryString = "SELECT * FROM MessageBox;";
+            connection = getConnection();
+            preparedStatement = connection.prepareStatement(queryString);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                messageList.add(new Message(resultSet.getInt("index"), resultSet.getString("message"), resultSet.getTimestamp("time")));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (resultSet != null)
+                    resultSet.close();
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return messageList;
+    }
 }
