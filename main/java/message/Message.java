@@ -7,15 +7,16 @@ public class Message {
     String text = "";
     Timestamp timestamp;
 
-    public Message(){
+    public Message(){ }
 
-    }
-
+    // initialize constructor
     public Message(int index, String text, Timestamp timeStamp){
         this.index = index;
         this.text = text;
         this.timestamp = timeStamp;
     }
+
+    // getter/setter
 
     public String getText() {
         return text;

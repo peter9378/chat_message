@@ -25,6 +25,7 @@ public class myClientFrame extends JFrame implements ActionListener {
         this.socket = socket;
         sender = new ClientSender(this, name);
 
+        // frame setting
         add("North", statusLabel);
         messageArea.setDisabledTextColor(Color.BLACK);
         messageArea.setEnabled(false);
@@ -35,13 +36,13 @@ public class myClientFrame extends JFrame implements ActionListener {
         panel.add(exitBtn);
         add("South", panel);
 
+        // add action listener
         messageField.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 sendBtn.doClick();
             }
         });
-
         sendBtn.addActionListener(this);
         exitBtn.addActionListener(new ActionListener() {
             @Override

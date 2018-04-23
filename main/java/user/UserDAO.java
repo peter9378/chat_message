@@ -2,7 +2,6 @@ package user;
 
 import myDB.DBUtil;
 
-import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -14,22 +13,15 @@ public class UserDAO {
     Connection connection = null;
     PreparedStatement preparedStatement = null;
     ResultSet resultSet = null;
+    DBUtil db = new DBUtil();
 
-    public UserDAO() {
+    public UserDAO() { }
 
-    }
-
-    public Connection getConnection() throws SQLException {
-        DBUtil dbUtil = new DBUtil();
-        Connection con;
-        con = dbUtil.getConnection();
-        return con;
-    }
-
+    // add user to database
     public void addUser(User user) {
         try {
             String query = "insert into User values(?, ?, ?, ?, ?);";
-            connection = getConnection();
+            connection = db.getConnection();
             preparedStatement = connection.prepareStatement(query);
             preparedStatement.setString(1, user.getId());
             preparedStatement.setString(2, user.getName());
@@ -55,34 +47,12 @@ public class UserDAO {
         }
     }
 
-    public void deleteUser(String id) {
-        try {
-            String queryString = "DELETE FROM User WHERE id=?";
-            connection = getConnection();
-            preparedStatement = connection.prepareStatement(queryString);
-            preparedStatement.setString(1, id);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                if (preparedStatement != null)
-                    preparedStatement.close();
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
+    // get user list from database
     public LinkedList<User> getUserList() {
         LinkedList<User> userList = new LinkedList<User>();
         try {
             String queryString = "SELECT * FROM User";
-            connection = getConnection();
+            connection = db.getConnection();
             preparedStatement = connection.prepareStatement(queryString);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -108,10 +78,11 @@ public class UserDAO {
         return userList;
     }
 
+    // check id overlap
     public boolean isIdExist(String id){
         try {
             String queryString = "SELECT * FROM User WHERE id=?";
-            connection = getConnection();
+            connection = db.getConnection();
             preparedStatement = connection.prepareStatement(queryString);
             preparedStatement.setString(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -136,10 +107,11 @@ public class UserDAO {
         return false;
     }
 
+    // authentication
     public boolean isCorrectUser(String id, String password){
         try{
             String queryString = "SELECT * FROM User WHERE id=?";
-            connection = getConnection();
+            connection = db.getConnection();
             preparedStatement = connection.prepareStatement(queryString);
             preparedStatement.setString(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -164,11 +136,12 @@ public class UserDAO {
         return false;
     }
 
+    // get name by user id
     public String getNameById(String id){
         String name = "";
         try{
             String queryString = "SELECT * FROM User WHERE id=?";
-            connection = getConnection();
+            connection = db.getConnection();
             preparedStatement = connection.prepareStatement(queryString);
             preparedStatement.setString(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -191,11 +164,12 @@ public class UserDAO {
         return name;
     }
 
+    // get current index by user id
     public int getIndexById(String id){
         int index = -1;
         try{
             String queryString = "SELECT * FROM User WHERE id=?";
-            connection = getConnection();
+            connection = db.getConnection();
             preparedStatement = connection.prepareStatement(queryString);
             preparedStatement.setString(1, id);
             resultSet = preparedStatement.executeQuery();
@@ -218,65 +192,11 @@ public class UserDAO {
         return index;
     }
 
-    public int getIndexByName(String name){
-        int index = -1;
-        try{
-            String queryString = "SELECT * FROM User WHERE name=?";
-            connection = getConnection();
-            preparedStatement = connection.prepareStatement(queryString);
-            preparedStatement.setString(1, name);
-            resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            index = resultSet.getInt("index");
-        }catch(SQLException e){
-            e.printStackTrace();
-        }finally{
-            try {
-                if (preparedStatement != null)
-                    preparedStatement.close();
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return index;
-    }
-
-    public boolean isOnlineUserByName(String name){
-        try{
-            String queryString = "SELECT * FROM User WHERE name=?";
-            connection = getConnection();
-            preparedStatement = connection.prepareStatement(queryString);
-            preparedStatement.setString(1, name);
-            resultSet = preparedStatement.executeQuery();
-            resultSet.next();
-            if(resultSet.getString("status").equals("online")){
-                return true;
-            }
-        }catch(SQLException e){
-            e.printStackTrace();
-        }finally{
-            try {
-                if (preparedStatement != null)
-                    preparedStatement.close();
-                if (connection != null)
-                    connection.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
-    }
-
+    // update user status by id
     public void updateUserStatus(String id, String status){
         try{
             String queryString = "UPDATE User set status=? WHERE id=?";
-            connection = getConnection();
+            connection = db.getConnection();
             preparedStatement = connection.prepareStatement(queryString);
             preparedStatement.setString(1, status);
             preparedStatement.setString(2, id);
@@ -297,10 +217,11 @@ public class UserDAO {
         }
     }
 
+    // set user current index by id
     public void setUserIndexById(int index, String id){
         try{
             String queryString = "UPDATE User set User.index=? WHERE id=?";
-            connection = getConnection();
+            connection = db.getConnection();
             preparedStatement = connection.prepareStatement(queryString);
             preparedStatement.setInt(1, index);
             preparedStatement.setString(2, id);
@@ -321,10 +242,11 @@ public class UserDAO {
         }
     }
 
+    // set user current index by name
     public void setUserIndexByName(int index, String name){
         try{
             String queryString = "UPDATE User set User.index=? WHERE name=?";
-            connection = getConnection();
+            connection = db.getConnection();
             preparedStatement = connection.prepareStatement(queryString);
             preparedStatement.setInt(1, index);
             preparedStatement.setString(2, name);
@@ -345,11 +267,12 @@ public class UserDAO {
         }
     }
 
+    // get user status by name
     public String getStatusByName(String name){
         String status = "";
         try{
             String queryString = "SELECT * FROM User WHERE name=?";
-            connection = getConnection();
+            connection = db.getConnection();
             preparedStatement = connection.prepareStatement(queryString);
             preparedStatement.setString(1, name);
             resultSet = preparedStatement.executeQuery();
@@ -370,21 +293,5 @@ public class UserDAO {
             }
         }
         return status;
-    }
-
-
-    public String getSHA256(String string) throws Exception {
-        StringBuffer sb = new StringBuffer();
-
-        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
-        messageDigest.update(string.getBytes());
-
-        byte[] messageString = messageDigest.digest();
-        for (int i = 0; i < messageString.length; i++) {
-            byte tempByte = messageString[i];
-            String tmp = Integer.toString((tempByte & 0xff) + 0x100, 16).substring(1);
-            sb.append(tmp);
-        }
-        return sb.toString();
     }
 }

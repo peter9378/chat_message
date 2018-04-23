@@ -1,29 +1,30 @@
 package user;
 
-enum Status {online, offline, busy};
-
 public class User {
 
     String id = "";
     String name = "";
     String password = "";
-    Status status = Status.online;
+    String status = "online";
     int index = -1;
 
-    public User(){
+    public User(){ }
 
+    // initialize constructor
+    public User(String id, String name, String status, int index){
+        new User(id, name, "", status, index);
     }
 
-    public User(String id, String name, int index){
-        new User(id, name, "", index);
-    }
-
-    public User(String id, String name, String password, int index){
+    // initialize constructor
+    public User(String id, String name, String password, String status, int index){
         this.id = id;
         this.name = name;
         this.password = password;
+        this.status = status;
         this.index = index;
     }
+
+    // getter/setter
 
     public String getId(){
         return this.id;
@@ -37,7 +38,7 @@ public class User {
         return this.password;
     }
 
-    public Status getStatus(){return this.status;};
+    public String getStatus(){return this.status;};
 
     public int getIndex(){
         return this.index;
@@ -55,7 +56,7 @@ public class User {
         this.name = name;
     }
 
-    public void setStatus(Status status) {this.status = status;}
+    public void setStatus(String status) {this.status = status;}
 
     public void setIndex(int index){
         this.index = index;

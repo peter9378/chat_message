@@ -14,6 +14,7 @@ public class myClient {
     public static void main(String args[]) {
         myClientFrame frame;    // GUI object
         try {
+            // String serverIp = "127.0.0.1";   // local ip
             String serverIp = "121.137.97.164"; // public ip
             String name = "";
             String id = "";
@@ -25,7 +26,7 @@ public class myClient {
 
             System.out.println("===== welcome to chat program! =====");
             while (true) {
-                // console
+                // console UI
                 System.out.println("===== please enter your command ====");
                 System.out.println("============ 1. sign in ============");
                 System.out.println("============ 2. sign up ============");
@@ -53,6 +54,7 @@ public class myClient {
                     dataOutputStream.writeUTF(id);
                     dataOutputStream.writeUTF(password);
 
+                    // get result data
                     DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                     String result = dataInputStream.readUTF();
                     if(result.equals("success")){
@@ -74,10 +76,12 @@ public class myClient {
                     System.out.println("please enter your password");
                     password = getSHA256(scanner.nextLine());   // apply encryption
 
+                    // send data to server
                     dataOutputStream.writeUTF(name);
                     dataOutputStream.writeUTF(id);
                     dataOutputStream.writeUTF(password);
 
+                    // get result data
                     DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
                     String result = dataInputStream.readUTF();
 
@@ -93,12 +97,14 @@ public class myClient {
                 }
             }
 
+            // open new frame
             frame = new myClientFrame(socket, name);
             frame.statusLabel.setText(status);
+
+            // run receiver and sender
             new ClientReceiver(socket, frame).start();
             ClientSender sender = new ClientSender(frame, name);
             sender.start();
-
         } catch (ConnectException ce) {
             ce.printStackTrace();
         } catch (Exception e) {
@@ -112,6 +118,7 @@ public class myClient {
         DataOutputStream dataOutputStream;
         String name;
 
+        // initialize constructor
         public ClientSender(myClientFrame frame, String name) {
             this.frame = frame;
             this.socket = this.frame.socket;
@@ -123,6 +130,7 @@ public class myClient {
             }
         }
 
+        // send message to server
         public void sendMessage(){
             try {
                 dataOutputStream.writeUTF("[" + name + "]" + frame.messageField.getText());
@@ -137,6 +145,7 @@ public class myClient {
         myClientFrame frame;
         DataInputStream dataInputStream;
 
+        // initialize constructor
         public ClientReceiver(Socket socket, myClientFrame frame) {
             this.socket = socket;
             this.frame = frame;
@@ -147,6 +156,7 @@ public class myClient {
             }
         }
 
+        // get message from server
         public void run() {
             while (dataInputStream != null) {
                 try {
@@ -164,6 +174,7 @@ public class myClient {
         }
     }
 
+    // SHA-256 encryption for password
     public static String getSHA256(String string) throws Exception {
         StringBuffer sb = new StringBuffer();
 
