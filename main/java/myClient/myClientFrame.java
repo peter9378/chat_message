@@ -43,7 +43,12 @@ public class myClientFrame extends JFrame implements ActionListener {
         });
 
         sendBtn.addActionListener(this);
-        exitBtn.addActionListener(this);
+        exitBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        });
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setBounds(300, 300, 400, 350);
@@ -65,6 +70,8 @@ public class myClientFrame extends JFrame implements ActionListener {
                 this.statusLabel.setText("offline");
             }else if(text.equals("/busy")){
                 this.statusLabel.setText("busy");
+            }else if(text.equals("/exit")){
+                this.exitBtn.doClick();
             }
 
             // send message to server
@@ -74,4 +81,5 @@ public class myClientFrame extends JFrame implements ActionListener {
             this.dispose();
         }
     }
+
 }

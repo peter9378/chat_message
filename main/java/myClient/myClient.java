@@ -25,13 +25,13 @@ public class myClient {
             // TODO: implement user profile with database
             // TODO: implement sign in/up
             // use user input temporarily
-            System.out.println("welcome to chat program!");
+            System.out.println("===== welcome to chat program! =====");
 
             while (true) {
-                System.out.println("please enter your command");
-                System.out.println("1. sign in");
-                System.out.println("2. sign up");
-                System.out.println("0. exit");
+                System.out.println("===== please enter your command ====");
+                System.out.println("============ 1. sign in ============");
+                System.out.println("============ 2. sign up ============");
+                System.out.println("============ 0. exit ===============");
 
                 Scanner scanner = new Scanner(System.in);
                 while (!scanner.hasNextInt()) {
@@ -90,12 +90,11 @@ public class myClient {
                     }
                 } else if (menu == 0) {
                     // exit program
-                    return;
+                    System.exit(0);
                 }
             }
 
             frame = new myClientFrame(socket, name);
-            frame.nameLabel.setText("Hello, " + name + "    status : ");
             frame.statusLabel.setText(status);
             new ClientReceiver(socket, frame).start();
             ClientSender sender = new ClientSender(frame, name);
