@@ -140,8 +140,16 @@ public class myServer {
                         id = dataInputStream.readUTF();
                         password = dataInputStream.readUTF();
 
-                        // check if id is overlapped or not
-                        if (!userDAO.isIdExist(id)) {
+                        // check if id or name is overlapped or not
+                        if (userDAO.isIdExist(id)) {
+                            System.out.println("already exist id");
+                            dataOutputStream.writeUTF("failure-id");
+                            continue;
+                        }else if(userDAO.isNameExist(name)){
+                            System.out.println("already exist name");
+                            dataOutputStream.writeUTF("failure-name");
+                            continue;
+                        }else {
                             // new User's index is the number of current message
                             userDAO.addUser(new User(id, name, password, "online", messageDAO.getSize()));
                             System.out.println("sign up success");
@@ -152,11 +160,6 @@ public class myServer {
                             // send sign up success message
                             dataOutputStream.writeUTF("success");
                             break;
-                        } else {
-                            // id overlap exception
-                            System.out.println("already exist id");
-                            dataOutputStream.writeUTF("failure");
-                            continue;
                         }
                     }else if(command.equals("/exit")){
                         this.socket.close();

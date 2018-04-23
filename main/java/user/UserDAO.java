@@ -107,6 +107,35 @@ public class UserDAO {
         return false;
     }
 
+    // check name overlap
+    public boolean isNameExist(String name){
+        try {
+            String queryString = "SELECT * FROM User WHERE name=?";
+            connection = db.getConnection();
+            preparedStatement = connection.prepareStatement(queryString);
+            preparedStatement.setString(1, name);
+            resultSet = preparedStatement.executeQuery();
+            resultSet.next();
+            if(resultSet.getString("name").equals(name)){
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (preparedStatement != null)
+                    preparedStatement.close();
+                if (connection != null)
+                    connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
     // authentication
     public boolean isCorrectUser(String id, String password){
         try{

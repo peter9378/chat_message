@@ -90,6 +90,10 @@ public class myClient {
                         break;
                     }else if(result.equals("failure")){
                         System.out.println("sign up fail! please try again.");
+                    }else if(result.equals("failure-id")){
+                        System.out.println("same id is already exists!");
+                    }else if(result.equals("failure-name")){
+                        System.out.println("same name is already exists!");
                     }
                 } else if (menu == 0) {
                     // exit program
