@@ -26,10 +26,14 @@ In local enviornment, you don't need to open the port. (But you need to change s
 > Please make sure install jdk10
 
 ## Server
-` java -jar server.jar `
+> ` java -jar server.jar `
+or just execute server.bat
+in this case, server.bat and server.jar must be in same directory
 
 ## Client
 ` java -jar client.jar `
+or just execute client.bat
+in this case, client.bat and client.jar must be in same directory
 
 ## How to use
 ### Server
