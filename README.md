@@ -4,7 +4,7 @@ This program is a multi chatting program. You can sign in, sign up, send and rec
 This program is written by Java.
 
 # Documentation
-Documentation can be found at [here](https://github.com/peter9378/chat_message/blob/master/ProjectDesignDocument.docx.) The documentation covers details of program usage and design.
+Documentation can be found at [here](https://github.com/peter9378/chat_message/blob/master/ProjectDesignDocument.docx) The documentation covers details of program usage and design.
 
 # Getting Started
 
@@ -18,7 +18,7 @@ Documentation can be found at [here](https://github.com/peter9378/chat_message/b
 - External JAR : MySQL Connector(mysql-connector-java-5.1.46-bin.jar)
 > You should add external jars in your IDE to use JDBC driver.
 - Port : 7777
-- DB : MySQL(CentOS 5 apm, http://210.89.188.165)
+- DB : MySQL(CentOS5 apm, http://210.89.188.165)
 
 ## Setting
 This program is using TCP. So you need to open the port. Default port is 7777 now.
@@ -44,8 +44,8 @@ In local enviornment, you don't need to open the port. (But you need to change s
 	- if password is incorrect, you have to enter the password again.
 - Sign up
 	- if you don't have an account, you can sign up in console UI.
-	- all you need to enter is name, id, password. Your password will be encrypted and stored in database.
-	- if same id is already exist, you should use another id.
+	- all you need to enter is name, id, password. Your password will be encrypted(SHA-256) and stored in database.
+	- if same id or name is already exist, you should use another id or name(notice which one is overlapped).
 - in chat room
 	- you can send message by pressing enter key or clicking the "send" button.
 	- you can receive messages from other users.
@@ -56,6 +56,7 @@ In local enviornment, you don't need to open the port. (But you need to change s
 	- /offline : your status will be changed to "offline". Now you can't send and receive messages, but you're still in the chat room.
 	- /busy : your status will be changed to "busy". You can send message but can't receive messages.
 	- /userlist : you can see the whole user's name and status.
+	- /retrieve : you can retrieve all message history in database(MessageBox)
 	- /exit : the program will be closed. You can exit the program without clicking the "exit" button.
 	- all messages are stored in database with timestamp. So you can find out when other user has sent messages.
 
