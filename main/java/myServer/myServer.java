@@ -46,10 +46,6 @@ public class myServer {
     }
 
     void sendToAll(String msg) {
-        // TODO: send to only online user
-        // TODO: when send successfully, update user's index(index++)
-        // TODO: add message to database
-        // TODO: send message include timestamp
         if(!msg.contains("[NOTICE]")) {
             messageDAO.addMessage(new Message(messageDAO.getIndex(), msg, getTimestamp()));
         }
@@ -100,7 +96,6 @@ public class myServer {
                 UserDAO userDAO = new UserDAO();
                 try {
                     String command = dataInputStream.readUTF();
-                    // TODO : check id and password in database
                     if (command.equals("in")) {
                         // sign in process
                         id = dataInputStream.readUTF();
@@ -127,7 +122,7 @@ public class myServer {
                             // wrong password, sign in failure
                             System.out.println("password incorrect");
                             dataOutputStream.writeUTF("failure");
-                            break;
+                            continue;
                         }
                     } else if (command.equals("up")) {
                         // sign up process
@@ -136,21 +131,25 @@ public class myServer {
                         password = dataInputStream.readUTF();
 
                         // check if id is overlapped or not
-                        if (userDAO.isIdExist(id)) {
-                            // new User's index is -1
-                            userDAO.addUser(new User(id, name, password, -1));
+                        if (!userDAO.isIdExist(id)) {
+                            // new User's index is the number of current message
+                            userDAO.addUser(new User(id, name, password, "online", messageDAO.getIndex()));
                             System.out.println("sign up success");
 
                             // add online client
                             clients.put(name, dataOutputStream);
-                            userDAO.updateUserStatus(id, "online");
 
                             dataOutputStream.writeUTF("success");
                             break;
                         } else {
                             // id overlap exception
                             System.out.println("already exist id");
+                            dataOutputStream.writeUTF("failure");
+                            continue;
                         }
+                    }else if(command.equals("/exit")){
+                        this.socket.close();
+                        break;
                     }
 
                 } catch (IOException e) {

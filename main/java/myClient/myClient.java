@@ -12,22 +12,20 @@ import java.util.Scanner;
 public class myClient {
 
     public static void main(String args[]) {
-        myClientFrame frame;
+        myClientFrame frame;    // GUI object
         try {
             String serverIp = "121.137.97.164"; // public ip
             String name = "";
             String id = "";
             String password = "";
             String status = "";
+
             // create socket and request connection
             Socket socket = new Socket(serverIp, 7777);
 
-            // TODO: implement user profile with database
-            // TODO: implement sign in/up
-            // use user input temporarily
             System.out.println("===== welcome to chat program! =====");
-
             while (true) {
+                // console
                 System.out.println("===== please enter your command ====");
                 System.out.println("============ 1. sign in ============");
                 System.out.println("============ 2. sign up ============");
@@ -42,7 +40,7 @@ public class myClient {
                 int menu = scanner.nextInt();
 
                 if (menu == 1) {
-                    // TODO: sign in
+                    // sign in
                     DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
                     dataOutputStream.writeUTF("in");
                     scanner.nextLine();
@@ -50,7 +48,8 @@ public class myClient {
                     id = scanner.nextLine();
                     System.out.println("please enter your password");
                     password = getSHA256(scanner.nextLine());   // apply encryption
-                    // TODO: authentication by server
+
+                    // authentication by server
                     dataOutputStream.writeUTF(id);
                     dataOutputStream.writeUTF(password);
 
@@ -64,7 +63,7 @@ public class myClient {
                         System.out.println("sign in fail! please try again.");
                     }
                 } else if (menu == 2) {
-                    // TODO: sign up
+                    // sign up
                     DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
                     dataOutputStream.writeUTF("up");
                     scanner = new Scanner(System.in);
